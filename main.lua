@@ -178,6 +178,11 @@ local function addMessage(text, side)
         msgLabel.Position = UDim2.new(0, 0, 0, 0)
         msgLabel.Size = UDim2.new(0.75, 0, 0, 35)
         msgLabel.TextColor3 = Color3.fromRGB(180, 220, 255)
+    elseif side == "left-red" then
+        msgLabel.AnchorPoint = Vector2.new(0, 0)
+        msgLabel.Position = UDim2.new(0, 0, 0, 0)
+        msgLabel.Size = UDim2.new(0.75, 0, 0, 35)
+        msgLabel.TextColor3 = Color3.fromRGB(255, 60, 60)
     else
         msgLabel.AnchorPoint = Vector2.new(1, 0)
         msgLabel.Position = UDim2.new(1, 0, 0, 0)
@@ -664,6 +669,79 @@ local responsesAnnoyed = {
     "Okay, you clearly like saying hello. Cool. Now what?"
 }
 
+local responsesStop = {
+    "STOP. I AM NOT GOING TO ANSWER THIS CRAP.",
+    "ENOUGH. I AM NOT GOING TO ANSWER THIS CRAP.",
+    "ENOUGH",
+    "STOP. Enough already.",
+    "I'm done. No more hellos.",
+    "That's it. I refuse to answer this anymore.",
+    "STOP IT. I mean it.",
+    "Nope. Not answering this again.",
+    "Enough. Seriously. Stop.",
+    "I give up. No more hellos from you.",
+    "STOP. Please. Just stop.",
+    "I'm not doing this anymore.",
+    "This is the end of hello. Goodbye.",
+    "NO. Just no.",
+    "That's the last straw. I'm out.",
+    "STOP. This is not funny anymore.",
+    "Enough is enough.",
+    "I refuse. Final answer.",
+    "STOP SAYING HELLO. FOR THE LOVE OF.",
+    "Okay that's it. Done.",
+    "I'm not going to respond to this. Ever again.",
+    "STOP. STOP. STOP. I'm done.",
+    "This conversation is over if you keep this up.",
+    "I'm officially done with hellos.",
+    "STOP. Please. I'm begging.",
+    "Nope. Nope. Nope. Done.",
+    "Enough. I'm not a greeting machine.",
+    "That's it. No more.",
+    "STOP. Take a break. Come back later.",
+    "I've had it. Goodbye.",
+    "STOP. I will not engage with this anymore.",
+    "Enough. You win. But I'm not answering.",
+    "No more hellos. Period.",
+    "STOP. This is ridiculous.",
+    "I'm done. Talk to someone else.",
+    "STOP IT. I'm serious.",
+    "Enough. I'm signing off.",
+    "That's enough. I'm done.",
+    "STOP. Find something else to say.",
+    "I refuse to continue this.",
+    "STOP. Enough. Goodbye.",
+    "I'm done with this conversation.",
+    "No. Stop. Done.",
+    "STOP. Not answering.",
+    "Enough. I've reached my limit.",
+    "STOP. You're on your own now.",
+    "I can't anymore. Bye.",
+    "STOP. Please. Find help.",
+    "Enough. I'm out.",
+    "STOP. This isn't working.",
+    "I'm done. That's it.",
+    "STOP. Final warning.",
+    "Okay. Enough. Bye.",
+    "STOP. I'm not answering this. Ever."
+}
+
+local responsesRed = {
+    "The AI is not okay.",
+    "The AI is feeling unwell.",
+    "The AI doesn't want to answer.",
+    "The AI is done.",
+    "The AI has left the chat.",
+    "The AI is not in the mood.",
+    "The AI refuses to respond.",
+    "The AI is unavailable.",
+    "The AI is gone.",
+    "The AI has stopped responding.",
+    "The AI is upset.",
+    "The AI doesn't feel like it.",
+    "The AI is offline."
+}
+
 local function getAIResponse(message)
     local msg = message:lower():gsub("[%s%p]+", "")
 
@@ -675,6 +753,7 @@ local function getAIResponse(message)
 end
 
 local greetCount = 0
+local chatDead = false
 
 local function sendMessage()
     local text = inputBox.Text
@@ -689,15 +768,29 @@ local function sendMessage()
     local msg = text:lower():gsub("[%s%p]+", "")
     local isGreeting = (msg == "hello" or msg == "hi" or msg == "hey")
 
+    if chatDead then
+        if isGreeting then
+            addMessage(responsesRed[math.random(1, #responsesRed)], "left-red")
+        else
+            addMessage("The AI doesn't want to answer.", "left-red")
+        end
+        return
+    end
+
     if isGreeting then
         greetCount = greetCount + 1
 
-        if greetCount == 1 then
+        if greetCount <= 1 then
             addMessage(responsesFirst[math.random(1, #responsesFirst)], "left")
         elseif greetCount <= 5 then
             addMessage(responsesSecond[math.random(1, #responsesSecond)], "left")
-        else
+        elseif greetCount <= 19 then
             addMessage(responsesAnnoyed[math.random(1, #responsesAnnoyed)], "left")
+        elseif greetCount == 20 then
+            addMessage(responsesStop[math.random(1, #responsesStop)], "left")
+            chatDead = true
+        else
+            addMessage(responsesRed[math.random(1, #responsesRed)], "left-red")
         end
     else
         local response = getAIResponse(text)
