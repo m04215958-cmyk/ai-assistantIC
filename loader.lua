@@ -1,21 +1,15 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
 
-local STORAGE_FILE = "ai_assistant_activated.txt"
 local CORRECT_KEY = "111"
+local MAIN_URL = "https://raw.githubusercontent.com/m04215958-cmyk/ai-assistantIC/main/main.lua"
 
-local alreadyActivated = false
+getgenv().AI_ACTIVATED = getgenv().AI_ACTIVATED or false
 
-if isfile and isfile(STORAGE_FILE) then
-    local saved = readfile(STORAGE_FILE)
-    if saved == player.Name then
-        alreadyActivated = true
-    end
-end
-
-if alreadyActivated then
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/m04215958-cmyk/ai-assistantIC/main/main.lua"))()
+if getgenv().AI_ACTIVATED then
+    loadstring(game:HttpGet(MAIN_URL .. "?t=" .. tick()))()
     return
 end
 
@@ -25,18 +19,12 @@ gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.Parent = CoreGui
 
-local bg = Instance.new("Frame")
-bg.Size = UDim2.new(1, 0, 1, 0)
-bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-bg.BackgroundTransparency = 1
-bg.BorderSizePixel = 0
-bg.Parent = gui
-
 local box = Instance.new("Frame")
 box.Size = UDim2.new(0, 0, 0, 0)
 box.Position = UDim2.new(0.5, 0, 0.5, 0)
 box.AnchorPoint = Vector2.new(0.5, 0.5)
 box.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+box.BackgroundTransparency = 1
 box.BorderSizePixel = 0
 box.ClipsDescendants = true
 box.Parent = gui
@@ -60,18 +48,6 @@ task.spawn(function()
     end
 end)
 
-local dustFrame = Instance.new("Frame")
-dustFrame.Size = UDim2.new(1, 0, 1, 0)
-dustFrame.BackgroundTransparency = 1
-dustFrame.ClipsDescendants = true
-dustFrame.Parent = box
-
-local dustCanvas = Instance.new("Frame")
-dustCanvas.Size = UDim2.new(1, 0, 1, 0)
-dustCanvas.BackgroundTransparency = 1
-dustCanvas.Parent = dustFrame
-
-local dustParticles = {}
 for i = 1, 40 do
     local p = Instance.new("Frame")
     p.Size = UDim2.new(0, math.random(1, 3), 0, math.random(1, 3))
@@ -79,32 +55,26 @@ for i = 1, 40 do
     p.BackgroundTransparency = math.random(70, 90) / 100
     p.BorderSizePixel = 0
     p.Position = UDim2.new(math.random(), 0, math.random(), 0)
-    p.Parent = dustCanvas
+    p.Parent = box
 
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(1, 0)
     corner.Parent = p
 
-    table.insert(dustParticles, {
-        frame = p,
-        vx = (math.random() - 0.5) * 0.0005,
-        vy = (math.random() - 0.5) * 0.0005
-    })
-end
-
-task.spawn(function()
-    while dustCanvas.Parent do
-        for _, d in ipairs(dustParticles) do
-            local pos = d.frame.Position
-            local newX = pos.X.Scale + d.vx
-            local newY = pos.Y.Scale + d.vy
-            if newX < 0 or newX > 1 then d.vx = -d.vx end
-            if newY < 0 or newY > 1 then d.vy = -d.vy end
-            d.frame.Position = UDim2.new(newX, 0, newY, 0)
+    task.spawn(function()
+        local vx = (math.random() - 0.5) * 0.0008
+        local vy = (math.random() - 0.5) * 0.0008
+        while p.Parent do
+            local pos = p.Position
+            local newX = pos.X.Scale + vx
+            local newY = pos.Y.Scale + vy
+            if newX < 0 or newX > 1 then vx = -vx end
+            if newY < 0 or newY > 1 then vy = -vy end
+            p.Position = UDim2.new(newX, 0, newY, 0)
+            task.wait(0.03)
         end
-        task.wait(0.03)
-    end
-end)
+    end)
+end
 
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -40, 0, 40)
@@ -114,7 +84,6 @@ title.Text = "Enter the key"
 title.TextColor3 = Color3.fromRGB(150, 150, 150)
 title.TextScaled = true
 title.Font = Enum.Font.GothamBold
-title.TextXAlignment = Enum.TextXAlignment.Center
 title.Parent = box
 
 local keyBox = Instance.new("Frame")
@@ -143,7 +112,6 @@ textBox.PlaceholderColor3 = Color3.fromRGB(60, 80, 140)
 textBox.TextColor3 = Color3.fromRGB(200, 220, 255)
 textBox.TextScaled = true
 textBox.Font = Enum.Font.GothamBold
-textBox.TextXAlignment = Enum.TextXAlignment.Center
 textBox.ClearTextOnFocus = false
 textBox.Parent = keyBox
 
@@ -162,26 +130,11 @@ local btnCorner = Instance.new("UICorner")
 btnCorner.CornerRadius = UDim.new(0, 10)
 btnCorner.Parent = activateBtn
 
-box.Size = UDim2.new(0, 0, 0, 0)
-box.BackgroundTransparency = 1
-
-local TweenService = game:GetService("TweenService")
-
-local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-
-local openTween = TweenService:Create(box, tweenInfo, {
-    Size = UDim2.new(0, 400, 0, 240)
-})
-
-openTween:Play()
-
-task.wait(0.5)
-
-local fadeTween = TweenService:Create(box, TweenInfo.new(0.3), {
+local openTween = TweenService:Create(box, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+    Size = UDim2.new(0, 400, 0, 240),
     BackgroundTransparency = 0
 })
-
-fadeTween:Play()
+openTween:Play()
 
 local activated = false
 
@@ -190,14 +143,11 @@ activateBtn.MouseButton1Click:Connect(function()
 
     if textBox.Text == CORRECT_KEY then
         activated = true
-
         activateBtn.Text = "Loading..."
         activateBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
         textBox.TextEditable = false
 
-        if writefile then
-            writefile(STORAGE_FILE, player.Name)
-        end
+        getgenv().AI_ACTIVATED = true
 
         task.wait(1.5)
 
@@ -205,12 +155,11 @@ activateBtn.MouseButton1Click:Connect(function()
             Size = UDim2.new(0, 0, 0, 0),
             BackgroundTransparency = 1
         })
-
         closeTween:Play()
         task.wait(0.4)
 
         gui:Destroy()
 
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/m04215958-cmyk/ai-scripts/main/main.lua"))()
+        loadstring(game:HttpGet(MAIN_URL .. "?t=" .. tick()))()
     end
 end)
