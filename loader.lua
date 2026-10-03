@@ -15,7 +15,7 @@ if isfile and isfile(STORAGE_FILE) then
 end
 
 if alreadyActivated then
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/m04215958-cmyk/ai-scripts/main/main.lua"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/m04215958-cmyk/ai-assistantIC/main/main.lua"))()
     return
 end
 
