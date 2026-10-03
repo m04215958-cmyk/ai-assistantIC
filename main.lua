@@ -184,6 +184,12 @@ local function addMessage(text, side)
         msgLabel.Position = UDim2.new(0, 0, 0, 0)
         msgLabel.Size = UDim2.new(0.75, 0, 0, 35)
         msgLabel.TextColor3 = Color3.fromRGB(180, 220, 255)
+    elseif side == "left-red" then
+        msgLabel.AnchorPoint = Vector2.new(0, 0)
+        msgLabel.Position = UDim2.new(0, 0, 0, 0)
+        msgLabel.Size = UDim2.new(0.75, 0, 0, 35)
+        msgLabel.TextColor3 = Color3.fromRGB(255, 40, 40)
+        msgLabel.BackgroundTransparency = 1
     else
         msgLabel.AnchorPoint = Vector2.new(1, 0)
         msgLabel.Position = UDim2.new(1, 0, 0, 0)
@@ -194,31 +200,6 @@ local function addMessage(text, side)
 
     task.wait(0.05)
     scrollFrame.CanvasPosition = Vector2.new(0, scrollFrame.AbsoluteCanvasSize.Y)
-end
-
-local function showRedText(text)
-    local redGui = Instance.new("ScreenGui")
-    redGui.Name = "AIRedText"
-    redGui.ResetOnSpawn = false
-    redGui.IgnoreGuiInset = true
-    redGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    redGui.DisplayOrder = 999
-    redGui.Parent = CoreGui
-
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 0, 80)
-    label.Position = UDim2.new(0.5, 0, 0.5, -40)
-    label.AnchorPoint = Vector2.new(0.5, 0.5)
-    label.BackgroundTransparency = 1
-    label.Text = text
-    label.TextColor3 = Color3.fromRGB(255, 40, 40)
-    label.TextScaled = true
-    label.Font = Enum.Font.GothamBold
-    label.TextXAlignment = Enum.TextXAlignment.Center
-    label.Parent = redGui
-
-    task.wait(2)
-    redGui:Destroy()
 end
 
 local responsesFirst = {
@@ -752,6 +733,32 @@ local responsesStop = {
     "STOP. I AM NOT ANSWERING THIS. EVER."
 }
 
+local responsesRed = {
+    "The AI is not okay.",
+    "The AI is feeling unwell.",
+    "The AI doesn't want to answer.",
+    "The AI is done.",
+    "The AI has left the chat.",
+    "The AI is not in the mood.",
+    "The AI refuses to respond.",
+    "The AI is unavailable.",
+    "The AI is gone.",
+    "The AI has stopped responding.",
+    "The AI is upset.",
+    "The AI doesn't feel like it.",
+    "The AI is offline.",
+    "The AI is not happy.",
+    "The AI is tired.",
+    "The AI needs a break.",
+    "The AI doesn't want to talk.",
+    "The AI is busy.",
+    "The AI is annoyed.",
+    "The AI is silent.",
+    "The AI is thinking.",
+    "The AI is unsure.",
+    "The AI has no words."
+}
+
 local function getAIResponse(message)
     local msg = message:lower():gsub("[%s%p]+", "")
 
@@ -787,7 +794,7 @@ local function sendMessage()
     end
 
     if chatDead then
-        showRedText("The AI is not okay.")
+        addMessage(responsesRed[math.random(1, #responsesRed)], "left-red")
         return
     end
 
@@ -803,7 +810,7 @@ local function sendMessage()
         addMessage(responsesStop[math.random(1, #responsesStop)], "left")
         chatDead = true
     else
-        showRedText("The AI is not okay.")
+        addMessage(responsesRed[math.random(1, #responsesRed)], "left-red")
     end
 end
 
